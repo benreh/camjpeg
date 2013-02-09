@@ -20,6 +20,9 @@
 #include <iostream>
 #include "ipl2jpeg.h"
 #include <fstream>
+#include <ctime>
+#include <iomanip>
+
 extern bool global_quit;
 
 //If not return false
@@ -32,6 +35,7 @@ Capture::Capture(int captureNumber, bool gui) :capture(0),frame(0),shm(0){
 	std::stringstream ss;
 	ss << "camjpeg" << captureNumber;
 	windowname = ss.str();
+	
 }
 Capture::~Capture() {
 	if (capture)
@@ -42,6 +46,15 @@ void Capture::getSettings(Settings &settings) {
 	w=settings.cfg.getvalueidx<int>("width",captureNumber,320);
 	h=settings.cfg.getvalueidx<int>("height",captureNumber,240);
 	BGR2RGB=settings.cfg.getvalueidx<bool>("bgr2rgb",captureNumber,true);
+	timestamp=settings.cfg.getvalueidx<bool>("timestamp",captureNumber,true);
+	timestampPos=cvPoint(settings.cfg.getvalueidx<int>("timestampposx",captureNumber,1),
+		settings.cfg.getvalueidx<int>("timestampposy",captureNumber,20));
+	//in BGR
+	fontcolor = cvScalar(settings.cfg.getvalueidx<int>("fontcolorb",captureNumber,128),
+			settings.cfg.getvalueidx<int>("fontcolorg",captureNumber,128),
+			settings.cfg.getvalueidx<int>("fontcolorr",captureNumber,128));
+	float fontsize=settings.cfg.getvalueidx<float>("fontsize",captureNumber,.5);
+	cvInitFont(&font,CV_FONT_HERSHEY_SIMPLEX|CV_FONT_ITALIC, fontsize,fontsize,0,1);
 	cout << w << "x" << h << endl;
 }
 
@@ -63,6 +76,10 @@ bool Capture::query() {
 		return false;
 	cout << ".";
 	cout.flush();
+	return true;
+}
+
+bool Capture::show() {
 	if(gui) {
 		cvShowImage( windowname.c_str(), frame );
 		int key = cvWaitKey(10);
@@ -78,6 +95,23 @@ bool Capture::save(std::string filename,unsigned char *outbuffer, long unsigned 
 	f.open(filename.c_str(),ofstream::binary);
 	f.write((const char*)outbuffer,outlen);
 	f.close();
+}
+
+bool Capture::annotate() {
+// current date/time based on current system
+	time_t now = time(0);
+	tm *ltm = localtime(&now);
+	stringstream ss;
+	ss << 1900 + ltm->tm_year ;
+	ss << "-" <<  setw(2) << setfill('0')  <<  1 + ltm->tm_mon; 
+	ss << "-" <<  setw(2) << setfill('0')  << ltm->tm_mday << " "; 
+	ss << setw(2) << setfill('0')  << ltm->tm_hour << ":";
+	ss << setw(2) << setfill('0')  << ltm->tm_min << ":";
+	ss << setw(2) << setfill('0')  << ltm->tm_sec ;
+	cvPutText(frame,ss.str().c_str(), timestampPos,&font, fontcolor);
+	cout << ss.str() << endl;
+	return true;
+
 }
 
 
@@ -103,7 +137,7 @@ bool Capture::convert() {
 	cd.picCounter++;
 	cd.mutex.unlock();
 
-	//~ save("test.jpg",outbuffer,outlen);
+	save("test.jpg",outbuffer,outlen);
 
 	
 
@@ -114,6 +148,8 @@ bool Capture::convert() {
 
 bool Capture::loop() {
 	IFNF(query());
+	IFNF(annotate());
+	IFNF(show());
 	IFNF(convert());
 	return true;
 }

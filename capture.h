@@ -37,15 +37,21 @@ private:
 
 	bool query();
 	bool convert();
+	bool annotate();
+	bool show();
 	bool save(std::string filename,unsigned char *outbuffer, long unsigned int outlen);
 
 	Shm* shm;
 
 	int captureNumber;
 	bool gui;
+	bool timestamp;
 	CvCapture *capture;
 	IplImage  *frame ;
+	CvPoint timestampPos;
+	CvScalar fontcolor;
 	std::string windowname;
+	CvFont font;
 	bool BGR2RGB;
 };
 #endif //CAPTURE_H
