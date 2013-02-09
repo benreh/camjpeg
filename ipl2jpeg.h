@@ -14,18 +14,11 @@
  // along with this program; if not, write to the Free Software
  // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  // MA 02110-1301, USA.
-#include "main.h"
-#include "capture.h"
-#include "settings.h"
-int main() {
+#include <stddef.h>
+#include <cv.h>
+#include <jpeglib.h>
 
-	Settings settings;
-
-	Capture C(0,true);
-	C.open();
-
-	while(C.loop()) {};
-
-	
-	return 0;
-}
+#ifndef IPL2JPEG_H
+#define IPL2JPEG_H
+bool ipl2jpeg(IplImage *frame, unsigned char **outbuffer, long unsigned int *outlen);
+#endif //IPL2JPEG_H

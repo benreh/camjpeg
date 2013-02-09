@@ -14,18 +14,31 @@
  // along with this program; if not, write to the Free Software
  // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  // MA 02110-1301, USA.
-#include "main.h"
-#include "capture.h"
-#include "settings.h"
-int main() {
+#ifndef CAPTURE_H
+#define CAPTURE_H
+#include <stddef.h>
+#include <cv.h>
+#include <highgui.h>
+#include <string>
 
-	Settings settings;
+class Capture {
+public:
+Capture(int captureNumber=0, bool gui=false);
+~Capture();
+bool open();
+bool loop();
 
-	Capture C(0,true);
-	C.open();
+	int h,w;
 
-	while(C.loop()) {};
+private:
 
-	
-	return 0;
-}
+	bool query();
+	bool convert();
+
+	int captureNumber;
+	bool gui;
+	CvCapture *capture;
+	IplImage  *frame ;
+	std::string windowname;
+};
+#endif //CAPTURE_H

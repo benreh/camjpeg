@@ -14,18 +14,24 @@
  // along with this program; if not, write to the Free Software
  // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  // MA 02110-1301, USA.
-#include "main.h"
-#include "capture.h"
-#include "settings.h"
-int main() {
+#ifndef SETTINGS_H
+#define SETTINGS_H
+#include <vector>
 
-	Settings settings;
 
-	Capture C(0,true);
-	C.open();
+class Settings_capture {
+public:
+Settings_capture();
+~Settings_capture();
+};
 
-	while(C.loop()) {};
+class Settings {
+public:
+Settings();
+~Settings();
 
-	
-	return 0;
-}
+std::vector<Settings_capture> capture;
+
+};
+
+#endif //SETTINGS_H
