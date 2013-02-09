@@ -14,34 +14,10 @@
  // along with this program; if not, write to the Free Software
  // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  // MA 02110-1301, USA.
-#ifndef CAPTURE_H
-#define CAPTURE_H
-#include <stddef.h>
-#include <cv.h>
-#include <highgui.h>
-#include <string>
-#include "settings.h"
 #include "shm.h"
+Shm::Shm() {
 
-class Capture {
-public:
-Capture(int captureNumber=0, bool gui=false);
-~Capture();
-bool open();
-bool loop();
-void getSettings(Settings &settings);
-void run(Shm* shm);
-	int h,w;
+}
+Shm::~Shm() {
 
-private:
-
-	bool query();
-	bool convert();
-
-	int captureNumber;
-	bool gui;
-	CvCapture *capture;
-	IplImage  *frame ;
-	std::string windowname;
-};
-#endif //CAPTURE_H
+}

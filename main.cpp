@@ -17,27 +17,35 @@
 #include "main.h"
 #include "capture.h"
 #include "settings.h"
+#include "shm.h"
 #include <vector>
+#include <boost/thread.hpp>
+
+bool global_quit=false;
 
 using namespace std;
 
 int main() {
-
+	Shm shm;
 	Settings settings;
-
-	vector<Capture> captures;
+	shm.settings=&settings;
+	vector<boost::thread*> threads;
+	vector<Capture*> captures;
 	for (int i=0; i < settings.cfg.getvalue<int>("nocams",1);i++) {
-		Capture capture;
-		capture.getSettings(settings);
+		Capture* capture=new Capture(i,true);
 		captures.push_back(capture);
+		boost::thread* thr = new boost::thread ( boost::bind( &Capture::run, capture,&shm ) );
+		threads.push_back(thr);
 	}
 
 
 
-	Capture C(0,true);
-	C.open();
+	while (!global_quit) {
+		sleep(1);
 
-	while(C.loop()) {};
+	}
+
+	
 
 	
 	return 0;

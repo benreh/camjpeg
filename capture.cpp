@@ -20,6 +20,8 @@
 #include <iostream>
 #include "ipl2jpeg.h"
 
+extern bool global_quit;
+
 //If not return false
 #define IFNF(X) if (!X) return false
 
@@ -64,7 +66,7 @@ bool Capture::query() {
 		cvShowImage( windowname.c_str(), frame );
 		int key = cvWaitKey(10);
 		if (key=='q')
-			return false;
+			global_quit=true;
 	}
 	return true;
 }
@@ -84,4 +86,13 @@ bool Capture::loop() {
 	IFNF(convert());
 
 	return true;
+}
+
+void Capture::run(Shm* shm) {
+	cout << "Capture thread started #" << captureNumber << endl;
+	getSettings(*(shm->settings));
+	open();
+	while(loop() && !global_quit) {};
+
+
 }
