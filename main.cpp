@@ -17,9 +17,22 @@
 #include "main.h"
 #include "capture.h"
 #include "settings.h"
+#include <vector>
+
+using namespace std;
+
 int main() {
 
 	Settings settings;
+
+	vector<Capture> captures;
+	for (int i=0; i < settings.cfg.getvalue<int>("nocams",1);i++) {
+		Capture capture;
+		capture.getSettings(settings);
+		captures.push_back(capture);
+	}
+
+
 
 	Capture C(0,true);
 	C.open();

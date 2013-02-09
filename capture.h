@@ -20,6 +20,7 @@
 #include <cv.h>
 #include <highgui.h>
 #include <string>
+#include "settings.h"
 
 class Capture {
 public:
@@ -27,6 +28,7 @@ Capture(int captureNumber=0, bool gui=false);
 ~Capture();
 bool open();
 bool loop();
+void getSettings(Settings &settings);
 
 	int h,w;
 

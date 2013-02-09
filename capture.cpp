@@ -19,6 +19,10 @@
 #include <sstream>
 #include <iostream>
 #include "ipl2jpeg.h"
+
+//If not return false
+#define IFNF(X) if (!X) return false
+
 using namespace std;
 Capture::Capture(int captureNumber, bool gui) :capture(0),frame(0) {
 	this->captureNumber=captureNumber;
@@ -26,12 +30,16 @@ Capture::Capture(int captureNumber, bool gui) :capture(0),frame(0) {
 	std::stringstream ss;
 	ss << "camjpeg" << captureNumber;
 	windowname = ss.str();
-	h=480;
-	w=640;
 }
 Capture::~Capture() {
 	if (capture)
 		cvReleaseCapture( &capture );
+}
+
+void Capture::getSettings(Settings &settings) {
+	w=settings.cfg.getvalueidx<int>("width",captureNumber,320);
+	h=settings.cfg.getvalueidx<int>("height",captureNumber,240);
+	cout << w << "x" << h << endl;
 }
 
 
@@ -66,12 +74,14 @@ bool Capture::convert() {
 	long unsigned int outlen;
 	ipl2jpeg(frame, &outbuffer, &outlen);
 	cout << outlen << endl;
+
+	return true;
 }
 
 
 bool Capture::loop() {
-	query();
-	convert();
+	IFNF(query());
+	IFNF(convert());
 
-
+	return true;
 }

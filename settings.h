@@ -17,20 +17,14 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 #include <vector>
-
-
-class Settings_capture {
-public:
-Settings_capture();
-~Settings_capture();
-};
+#include "configfile/configfile.h"
 
 class Settings {
 public:
-Settings();
+Settings(std::string filename="camjpeg.conf");
 ~Settings();
 
-std::vector<Settings_capture> capture;
+ConfigFile cfg;
 
 };
 

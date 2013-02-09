@@ -15,16 +15,15 @@
  // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  // MA 02110-1301, USA.
 #include "settings.h"
-Settings::Settings() {
+#include <sstream>
+using namespace std;
+Settings::Settings(std::string filename) {
+	cfg.load(filename);
+	cfg.dump();
 
+
+	
 }
 Settings::~Settings() {
-
-}
-
-Settings_capture::Settings_capture() {
-
-}
-Settings_capture::~Settings_capture() {
 
 }
