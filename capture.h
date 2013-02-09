@@ -39,6 +39,8 @@ private:
 	bool convert();
 	bool save(std::string filename,unsigned char *outbuffer, long unsigned int outlen);
 
+	Shm* shm;
+
 	int captureNumber;
 	bool gui;
 	CvCapture *capture;

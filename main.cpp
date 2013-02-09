@@ -20,6 +20,7 @@
 #include "shm.h"
 #include <vector>
 #include <boost/thread.hpp>
+#include <iostream>
 
 bool global_quit=false;
 
@@ -31,7 +32,9 @@ int main() {
 	shm.settings=&settings;
 	vector<boost::thread*> threads;
 	vector<Capture*> captures;
-	for (int i=0; i < settings.cfg.getvalue<int>("nocams",1);i++) {
+	int nocams=settings.cfg.getvalue<int>("nocams",1);
+	shm.allocateCapture(nocams);
+	for (int i=0; i < nocams ;i++) {
 		Capture* capture=new Capture(i,true);
 		captures.push_back(capture);
 		boost::thread* thr = new boost::thread ( boost::bind( &Capture::run, capture,&shm ) );
@@ -41,12 +44,14 @@ int main() {
 
 
 	while (!global_quit) {
-		sleep(1);
+		sleep(5);
 		global_quit=true;
 	}
+	cout << "\nwaiting for threads to quit..." << endl;
+	for (vector<boost::thread*>::iterator th=threads.begin();th!=threads.end(); th++) {
+		(*th)->join();
+	}
 
-	
-
-	
+	cout << "quitting" << endl;
 	return 0;
 }

@@ -17,10 +17,27 @@
 #ifndef SHM_H
 #define SHM_H
 #include "settings.h"
+#include <boost/thread.hpp>
+
+class CaptureData {
+public:
+CaptureData();
+~CaptureData();
+unsigned char* jpgdata;
+long unsigned int jpglen;
+long unsigned int picCounter;
+boost::mutex mutex;
+
+
+};
+
 class Shm {
 public:
 Shm();
 ~Shm();
+void allocateCapture(int nr);
+
+CaptureData* captureData;
 
 Settings* settings;
 };

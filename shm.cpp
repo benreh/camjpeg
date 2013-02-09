@@ -15,9 +15,24 @@
  // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  // MA 02110-1301, USA.
 #include "shm.h"
-Shm::Shm() {
+#include <iostream>
+
+CaptureData::CaptureData(): jpgdata(0), jpglen(0), picCounter(0){
+}
+
+CaptureData::~CaptureData() {
+}
+
+Shm::Shm(): captureData(0){
 
 }
 Shm::~Shm() {
+	if (captureData)
+		delete[] captureData;
 
+}
+
+
+void Shm::allocateCapture(int nr) {
+	captureData=new CaptureData[nr];
 }

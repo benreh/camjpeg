@@ -26,7 +26,7 @@ extern bool global_quit;
 #define IFNF(X) if (!X) return false
 
 using namespace std;
-Capture::Capture(int captureNumber, bool gui) :capture(0),frame(0) {
+Capture::Capture(int captureNumber, bool gui) :capture(0),frame(0),shm(0){
 	this->captureNumber=captureNumber;
 	this->gui=gui;
 	std::stringstream ss;
@@ -78,21 +78,35 @@ bool Capture::save(std::string filename,unsigned char *outbuffer, long unsigned 
 	f.open(filename.c_str(),ofstream::binary);
 	f.write((const char*)outbuffer,outlen);
 	f.close();
-	cout << outlen << endl;
 }
 
 
 bool Capture::convert() {
-	unsigned char *outbuffer;
-	long unsigned int outlen;
+	unsigned char* outbuffer=0;
+	long unsigned int outlen=0;
+
+	
 
 	if (BGR2RGB)
 		cvCvtColor ( frame, frame, CV_BGR2RGB );
 
 	ipl2jpeg(frame, &outbuffer, &outlen);
+	//tust to make it shorter
+	CaptureData& cd=shm->captureData[captureNumber];
 
+	cd.mutex.lock();
 
-	save("test.jpg",outbuffer,outlen);
+	if (cd.jpgdata!=0)
+		free(cd.jpgdata);
+	cd.jpgdata=outbuffer;
+	cd.jpglen=outlen;
+	cd.picCounter++;
+	cd.mutex.unlock();
+
+	//~ save("test.jpg",outbuffer,outlen);
+
+	
+
 
 	return true;
 }
@@ -101,12 +115,12 @@ bool Capture::convert() {
 bool Capture::loop() {
 	IFNF(query());
 	IFNF(convert());
-
 	return true;
 }
 
 void Capture::run(Shm* shm) {
 	cout << "Capture thread started #" << captureNumber << endl;
+	this->shm=shm;
 	getSettings(*(shm->settings));
 	open();
 	while(loop() && !global_quit) {};
