@@ -42,7 +42,7 @@ int main() {
 
 	while (!global_quit) {
 		sleep(1);
-
+		global_quit=true;
 	}
 
 	

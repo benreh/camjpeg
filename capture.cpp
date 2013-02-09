@@ -19,7 +19,7 @@
 #include <sstream>
 #include <iostream>
 #include "ipl2jpeg.h"
-
+#include <fstream>
 extern bool global_quit;
 
 //If not return false
@@ -41,6 +41,7 @@ Capture::~Capture() {
 void Capture::getSettings(Settings &settings) {
 	w=settings.cfg.getvalueidx<int>("width",captureNumber,320);
 	h=settings.cfg.getvalueidx<int>("height",captureNumber,240);
+	BGR2RGB=settings.cfg.getvalueidx<bool>("bgr2rgb",captureNumber,true);
 	cout << w << "x" << h << endl;
 }
 
@@ -71,11 +72,27 @@ bool Capture::query() {
 	return true;
 }
 
+bool Capture::save(std::string filename,unsigned char *outbuffer, long unsigned int outlen) {
+
+	ofstream f;
+	f.open(filename.c_str(),ofstream::binary);
+	f.write((const char*)outbuffer,outlen);
+	f.close();
+	cout << outlen << endl;
+}
+
+
 bool Capture::convert() {
 	unsigned char *outbuffer;
 	long unsigned int outlen;
+
+	if (BGR2RGB)
+		cvCvtColor ( frame, frame, CV_BGR2RGB );
+
 	ipl2jpeg(frame, &outbuffer, &outlen);
-	cout << outlen << endl;
+
+
+	save("test.jpg",outbuffer,outlen);
 
 	return true;
 }

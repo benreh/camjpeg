@@ -37,11 +37,13 @@ private:
 
 	bool query();
 	bool convert();
+	bool save(std::string filename,unsigned char *outbuffer, long unsigned int outlen);
 
 	int captureNumber;
 	bool gui;
 	CvCapture *capture;
 	IplImage  *frame ;
 	std::string windowname;
+	bool BGR2RGB;
 };
 #endif //CAPTURE_H
