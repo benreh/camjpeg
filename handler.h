@@ -34,7 +34,6 @@ private:
 	int extractNr(string str);
 	int sock;
 	Shm* shm;
-	int lastcounter;
 	string splitter;
 };
 #endif //HANDLER_H

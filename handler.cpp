@@ -31,7 +31,7 @@
 
 extern bool global_quit;
 
-Handler::Handler() : lastcounter(-1), splitter("splitter"){
+Handler::Handler() :  splitter("splitter"){
 
 }
 
@@ -40,27 +40,17 @@ Handler::~Handler() {
 }
 
 bool Handler::send(string str) {
-	write(sock,str.c_str(),strlen(str.c_str()));
+	if (write(sock,str.c_str(),strlen(str.c_str()))==-1)
+		return false;
 	return true;
 }
 bool Handler::sendjpg(int nr) {
 	bool ret=true;
-	bool wait=false;
 	CaptureData& cd=shm->captureData[nr];
 	cd.mutex.lock();
-	if (lastcounter == -1 ||  lastcounter < cd.picCounter) {
-		if (write(sock,cd.jpgdata,cd.jpglen)==-1)
-			ret=false;
-		lastcounter=cd.picCounter;
-		cout << cd.picCounter << endl;
-	} else {
-		wait=true;
-	}
+	if (write(sock,cd.jpgdata,cd.jpglen)==-1)
+		ret=false;
 	cd.mutex.unlock();
-	if (wait) {
-		usleep(100000);
-		cout << " wait" << endl;
-	}
 	return ret;
 }
 
@@ -85,6 +75,34 @@ bool Handler::answer(string request) {
 		out +="Pragma: no-cache\r\n";
 		out +="Content-type: multipart/x-mixed-replace; boundary="+splitter+"\r\n\r\n";
 		send(out);
+		bool wait=false;
+		bool running=true;
+		int lastcounter(-1);
+		while (running && !global_quit) {
+			CaptureData& cd=shm->captureData[nr];
+			cd.mutex.lock();
+			if (lastcounter == -1 ||  lastcounter < cd.picCounter) {
+				running=false;
+				if (send(string("--")+splitter)) {
+					running=true;
+				} 
+				if (send("Content-type: image/jpeg\n\n")) {
+					running=true;
+				} 
+				if (write(sock,cd.jpgdata,cd.jpglen)!=-1) {
+					running=true;
+				} 
+				lastcounter=cd.picCounter;
+			} else {
+				wait=true;
+			}
+			cd.mutex.unlock();
+			if (wait) {
+				usleep(10000);
+			}
+		}
+
+		
 		while (	sendjpg(nr)) {
 			send(splitter);
 		}

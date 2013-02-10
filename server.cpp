@@ -120,7 +120,9 @@ bool Server::run() {
 	}
 	cout << "stopping server..." << endl;
 	for (vector<boost::thread*>::iterator th=threads.begin();th!=threads.end(); th++) {
-		(*th)->join();
+		 int n = (int)boost::posix_time::time_duration::ticks_per_second() / 10; 
+        boost::posix_time::time_duration delay(0,0,0,n); 
+        (*th)->timed_join(delay);
 		delete *th;
 	}
 	return true;
