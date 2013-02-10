@@ -54,17 +54,25 @@ bool Handler::sendjpg(int nr) {
 	cd.mutex.unlock();
 
 	bool repeat=true;
+	unsigned char* outbuffer=0;
+	long unsigned int outlen=0;
 	while (repeat) {
 		cd.mutex.lock();
 		if (picCounter!=cd.picCounter) {
-			if (send(sock,cd.jpgdata,cd.jpglen,MSG_NOSIGNAL)==-1) {
-				ret=false;
-			}
+			outlen=cd.jpglen;
+			outbuffer = new unsigned char[outlen];
+			memcpy(outbuffer,cd.jpgdata,outlen);
 			repeat=false;
 		} 
 		cd.mutex.unlock();
 		if (repeat)
 			usleep(10000);
+	}
+	if (outbuffer) {
+		if (send(sock,outbuffer,outlen,MSG_NOSIGNAL)==-1) {
+			ret=false;
+		}
+		delete[] outbuffer;
 	}
 	return ret;
 }
@@ -94,19 +102,15 @@ bool Handler::answer(string request) {
 		bool running=true;
 		int lastcounter(-1);
 		while (running && !global_quit) {
+			unsigned char* outbuffer=0;
+			long unsigned int outlen=0;
 			CaptureData& cd=shm->captureData[nr];
 			cd.mutex.lock();
 			if (lastcounter == -1 ||  lastcounter < cd.picCounter) {
 				running=false;
-				if (send_str(string("--")+splitter)) {
-					running=true;
-				} 
-				if (send_str("Content-type: image/jpeg\n\n")) {
-					running=true;
-				} 
-				if (send(sock,cd.jpgdata,cd.jpglen,MSG_NOSIGNAL)!=-1) {
-					running=true;
-				} 
+				outlen=cd.jpglen;
+				outbuffer = new unsigned char[outlen];
+				memcpy(outbuffer,cd.jpgdata,outlen);
 				lastcounter=cd.picCounter;
 				cd.idleCounter=0;
 			} else {
@@ -116,11 +120,18 @@ bool Handler::answer(string request) {
 			if (wait) {
 				usleep(10000);
 			}
-		}
-
-		
-		while (	sendjpg(nr)) {
-			send_str(splitter);
+			if (outbuffer){
+				if (send_str(string("--")+splitter)) {
+					running=true;
+				} 
+				if (send_str("Content-type: image/jpeg\n\n")) {
+					running=true;
+				} 
+				if (send(sock,cd.jpgdata,cd.jpglen,MSG_NOSIGNAL)!=-1) {
+					running=true;
+				}
+				delete[] outbuffer;
+			}
 		}
 	} else {
 		cout << "sending 404" << endl;
