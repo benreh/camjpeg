@@ -27,6 +27,7 @@ unsigned char* jpgdata;
 long unsigned int jpglen;
 long unsigned int picCounter;
 boost::mutex mutex;
+unsigned int idleCounter;
 
 
 };

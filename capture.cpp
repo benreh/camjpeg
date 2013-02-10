@@ -115,28 +115,35 @@ bool Capture::annotate() {
 
 
 bool Capture::convert() {
+	CaptureData& cd=shm->captureData[captureNumber];
 	unsigned char* outbuffer=0;
 	long unsigned int outlen=0;
 
+	bool notIdle=(cd.idleCounter < shm->settings->idleTimeout);
+
 	
+	if (notIdle) {
+		IFNF(annotate());
+	}
 
-	if (BGR2RGB)
-		cvCvtColor ( frame, frame, CV_BGR2RGB );
+	IFNF(show());
 
-	ipl2jpeg(frame, &outbuffer, &outlen);
-	//tust to make it shorter
-	CaptureData& cd=shm->captureData[captureNumber];
+	if (notIdle) {
+		if (BGR2RGB)
+			cvCvtColor ( frame, frame, CV_BGR2RGB );
 
-	cd.mutex.lock();
+		ipl2jpeg(frame, &outbuffer, &outlen);
+		cd.mutex.lock();
+		if (cd.jpgdata!=0)
+			free(cd.jpgdata);
+		cd.jpgdata=outbuffer;
+		cd.jpglen=outlen;
+		cd.picCounter++;
+		cd.idleCounter++;
+		cd.mutex.unlock();
+	}	
 
-	if (cd.jpgdata!=0)
-		free(cd.jpgdata);
-	cd.jpgdata=outbuffer;
-	cd.jpglen=outlen;
-	cd.picCounter++;
-	cd.mutex.unlock();
-
-	save("test.jpg",outbuffer,outlen);
+	//~ save("test.jpg",outbuffer,outlen);
 
 	
 
@@ -147,8 +154,6 @@ bool Capture::convert() {
 
 bool Capture::loop() {
 	IFNF(query());
-	IFNF(annotate());
-	IFNF(show());
 	IFNF(convert());
 	return true;
 }

@@ -46,11 +46,26 @@ bool Handler::send(string str) {
 }
 bool Handler::sendjpg(int nr) {
 	bool ret=true;
+	int picCounter=0;
 	CaptureData& cd=shm->captureData[nr];
 	cd.mutex.lock();
-	if (write(sock,cd.jpgdata,cd.jpglen)==-1)
-		ret=false;
+	cd.idleCounter=0;
+	picCounter=cd.picCounter;
 	cd.mutex.unlock();
+
+	bool repeat=true;
+	while (repeat) {
+		cd.mutex.lock();
+		if (picCounter!=cd.picCounter) {
+			if (write(sock,cd.jpgdata,cd.jpglen)==-1) {
+				ret=false;
+			}
+			repeat=false;
+		} 
+		cd.mutex.unlock();
+		if (repeat)
+			usleep(10000);
+	}
 	return ret;
 }
 
@@ -93,6 +108,7 @@ bool Handler::answer(string request) {
 					running=true;
 				} 
 				lastcounter=cd.picCounter;
+				cd.idleCounter=0;
 			} else {
 				wait=true;
 			}

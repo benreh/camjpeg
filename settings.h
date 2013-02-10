@@ -28,6 +28,7 @@ ConfigFile cfg;
 int nocams;
 int requestLength;
 int maxConnections;
+int idleTimeout;
 
 };
 

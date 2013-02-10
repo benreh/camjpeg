@@ -23,6 +23,7 @@ Settings::Settings(std::string filename) {
 	nocams=cfg.getvalue<int>("nocams",1);
 	requestLength=cfg.getvalue<int>("requestlength",10*1024);
 	maxConnections=cfg.getvalue<int>("maxvonnections",20);
+	idleTimeout=cfg.getvalue<int>("idletimeout",100);
 }
 Settings::~Settings() {
 

@@ -17,7 +17,7 @@
 #include "shm.h"
 #include <iostream>
 
-CaptureData::CaptureData(): jpgdata(0), jpglen(0), picCounter(0){
+CaptureData::CaptureData(): jpgdata(0), jpglen(0), picCounter(0), idleCounter(0){
 }
 
 CaptureData::~CaptureData() {
