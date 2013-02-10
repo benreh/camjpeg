@@ -14,19 +14,19 @@
  // along with this program; if not, write to the Free Software
  // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  // MA 02110-1301, USA.
-#ifndef SETTINGS_H
-#define SETTINGS_H
-#include <vector>
-#include "configfile/configfile.h"
-
-class Settings {
+#ifndef SERVER_H
+#define SERVER_H
+#include "shm.h"
+class Server {
 public:
-Settings(std::string filename="camjpeg.conf");
-~Settings();
+Server(Shm* shm);
+~Server();
+bool run();
 
-ConfigFile cfg;
-int nocams;
-
+private:
+bool prepare_socket(int& origsock, int port);
+bool select_call(int sock, int time);
+int accept_call(int sock_listen);
+Shm* shm;
 };
-
-#endif //SETTINGS_H
+#endif //SERVER_H

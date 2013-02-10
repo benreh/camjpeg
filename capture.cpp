@@ -74,8 +74,8 @@ bool Capture::query() {
 	frame = cvQueryFrame( capture );
 	if (!frame)
 		return false;
-	cout << ".";
-	cout.flush();
+	//~ cout << ".";
+	//~ cout.flush();
 	return true;
 }
 
@@ -109,7 +109,6 @@ bool Capture::annotate() {
 	ss << setw(2) << setfill('0')  << ltm->tm_min << ":";
 	ss << setw(2) << setfill('0')  << ltm->tm_sec ;
 	cvPutText(frame,ss.str().c_str(), timestampPos,&font, fontcolor);
-	cout << ss.str() << endl;
 	return true;
 
 }

@@ -13,6 +13,8 @@ add_executable (
 	ipl2jpeg.cpp
 	settings.cpp
 	shm.cpp
+	server.cpp
+	handler.cpp
 	configfile/configfile.cpp
 	)
 TARGET_LINK_LIBRARIES( camjpeg ${OpenCV_LIBS} ${LibJpeg_LIBRARY} ${Boost_THREAD_LIBRARY})

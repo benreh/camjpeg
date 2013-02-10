@@ -14,19 +14,27 @@
  // along with this program; if not, write to the Free Software
  // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  // MA 02110-1301, USA.
-#ifndef SETTINGS_H
-#define SETTINGS_H
-#include <vector>
-#include "configfile/configfile.h"
+#ifndef HANDLER_H
+#define HANDLER_H
+#include <string>
+#include "shm.h"
 
-class Settings {
+using namespace std;
+class Handler {
 public:
-Settings(std::string filename="camjpeg.conf");
-~Settings();
-
-ConfigFile cfg;
-int nocams;
-
+	Handler();
+	~Handler();
+	void run(int sock, Shm* shm);
+private:
+	bool read_in(string& str);
+	bool get_request(string& request);
+	bool answer(string request);
+	bool send(string str);
+	bool sendjpg(int nr);
+	int extractNr(string str);
+	int sock;
+	Shm* shm;
+	int lastcounter;
+	string splitter;
 };
-
-#endif //SETTINGS_H
+#endif //HANDLER_H

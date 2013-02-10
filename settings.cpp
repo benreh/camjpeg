@@ -20,9 +20,7 @@ using namespace std;
 Settings::Settings(std::string filename) {
 	cfg.load(filename);
 	cfg.dump();
-
-
-	
+	nocams=cfg.getvalue<int>("nocams",1);
 }
 Settings::~Settings() {
 
