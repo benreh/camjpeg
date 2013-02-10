@@ -24,6 +24,7 @@ Settings::Settings(std::string filename) {
 	requestLength=cfg.getvalue<int>("requestlength",10*1024);
 	maxConnections=cfg.getvalue<int>("maxvonnections",20);
 	idleTimeout=cfg.getvalue<int>("idletimeout",100);
+	useGui=cfg.getvalue<int>("usegui",false);
 }
 Settings::~Settings() {
 

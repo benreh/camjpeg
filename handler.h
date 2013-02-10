@@ -29,7 +29,7 @@ private:
 	bool read_in(string& str);
 	bool get_request(string& request);
 	bool answer(string request);
-	bool send(string str);
+	bool send_str(string str);
 	bool sendjpg(int nr);
 	int extractNr(string str);
 	int sock;

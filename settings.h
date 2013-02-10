@@ -29,6 +29,7 @@ int nocams;
 int requestLength;
 int maxConnections;
 int idleTimeout;
+bool useGui;
 
 };
 

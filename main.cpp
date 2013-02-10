@@ -48,7 +48,7 @@ int main() {
 	int nocams=settings.nocams;
 	shm.allocateCapture(nocams);
 	for (int i=0; i < nocams ;i++) {
-		Capture* capture=new Capture(i,true);
+		Capture* capture=new Capture(i,settings.useGui);
 		captures.push_back(capture);
 		boost::thread* thr = new boost::thread ( boost::bind( &Capture::run, capture,&shm ) );
 		threads.push_back(thr);

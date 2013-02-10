@@ -39,8 +39,8 @@ Handler::~Handler() {
 
 }
 
-bool Handler::send(string str) {
-	if (write(sock,str.c_str(),strlen(str.c_str()))==-1)
+bool Handler::send_str(string str) {
+	if (send(sock,str.c_str(),strlen(str.c_str()),MSG_NOSIGNAL)==-1)
 		return false;
 	return true;
 }
@@ -57,7 +57,7 @@ bool Handler::sendjpg(int nr) {
 	while (repeat) {
 		cd.mutex.lock();
 		if (picCounter!=cd.picCounter) {
-			if (write(sock,cd.jpgdata,cd.jpglen)==-1) {
+			if (send(sock,cd.jpgdata,cd.jpglen,MSG_NOSIGNAL)==-1) {
 				ret=false;
 			}
 			repeat=false;
@@ -80,7 +80,7 @@ bool Handler::answer(string request) {
 		cout << "requested jpg from " << nr << endl;
 		out  ="HTTP/1.1 200 OK\r\n";
 		out +="Content-Type: image/jpeg\r\n\r\n";
-		send(out);
+		send_str(out);
 		sendjpg(nr);
 	} else if (request.find(".mjpg")!=std::string::npos &&  nr >-1){
 		cout << "requested mjpg from " << nr << endl;
@@ -89,7 +89,7 @@ bool Handler::answer(string request) {
 		out +="Cache-Control: private\r\n";
 		out +="Pragma: no-cache\r\n";
 		out +="Content-type: multipart/x-mixed-replace; boundary="+splitter+"\r\n\r\n";
-		send(out);
+		send_str(out);
 		bool wait=false;
 		bool running=true;
 		int lastcounter(-1);
@@ -98,13 +98,13 @@ bool Handler::answer(string request) {
 			cd.mutex.lock();
 			if (lastcounter == -1 ||  lastcounter < cd.picCounter) {
 				running=false;
-				if (send(string("--")+splitter)) {
+				if (send_str(string("--")+splitter)) {
 					running=true;
 				} 
-				if (send("Content-type: image/jpeg\n\n")) {
+				if (send_str("Content-type: image/jpeg\n\n")) {
 					running=true;
 				} 
-				if (write(sock,cd.jpgdata,cd.jpglen)!=-1) {
+				if (send(sock,cd.jpgdata,cd.jpglen,MSG_NOSIGNAL)!=-1) {
 					running=true;
 				} 
 				lastcounter=cd.picCounter;
@@ -120,12 +120,12 @@ bool Handler::answer(string request) {
 
 		
 		while (	sendjpg(nr)) {
-			send(splitter);
+			send_str(splitter);
 		}
 	} else {
 		cout << "sending 404" << endl;
 		out ="HTTP/1.0 404 Not Found\r\n";
-		send(out);
+		send_str(out);
 	}
 
 	return true;
@@ -192,6 +192,7 @@ bool Handler::get_request(string& request) {
 void Handler::run(int sock, Shm* shm) {
 	this->sock=sock;
 	this->shm=shm;
+	
 	cout << "Handling" << endl;
 	string request("");
 	if (!get_request(request)) {
