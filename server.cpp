@@ -96,13 +96,17 @@ int Server::accept_call(int sock_listen) {
 
 bool Server::run() {
 	int sock;
-	while (! prepare_socket(sock, shm->settings->cfg.getvalue<int>("port",8888)))
-	{
+	while (! prepare_socket(sock, shm->settings->cfg.getvalue<int>("port",8888))){
+		if (global_quit)
+			return false;
 		 sleep(1);
 	}
 
 	vector<boost::thread*> threads;
 	vector<Handler*> handler;
+
+	int n = (int)boost::posix_time::time_duration::ticks_per_second() / 10; 
+        	boost::posix_time::time_duration minimal_time(0,0,0,n); 
 
 	while(!global_quit) {
 		bool ret=select_call(sock,100000);
@@ -114,16 +118,22 @@ bool Server::run() {
 			boost::thread* thr = new boost::thread ( boost::bind( &Handler::run, h,sock_new,shm ) );
 			threads.push_back(thr);
 		}
-		
+		//cleanup
+		for (vector<boost::thread*>::iterator th=threads.begin();th!=threads.end(); ) {
+			if ((*th)->timed_join(minimal_time)) {
+				delete (*th);
+				threads.erase(th);
+			} else {
+				th++;
+			}
+		}
 	
 
 	}
-	cout << "stopping server..." << endl;
-	for (vector<boost::thread*>::iterator th=threads.begin();th!=threads.end(); th++) {
-		 int n = (int)boost::posix_time::time_duration::ticks_per_second() / 10; 
-        boost::posix_time::time_duration delay(0,0,0,n); 
-        (*th)->timed_join(delay);
-		delete *th;
-	}
+	//~ cout << "stopping server..." << endl;
+	//~ for (vector<boost::thread*>::iterator th=threads.begin();th!=threads.end(); th++) {
+        //~ (*th)->timed_join(minimal_time);
+		//~ delete *th;
+	//~ }
 	return true;
 }
