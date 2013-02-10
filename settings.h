@@ -26,6 +26,8 @@ Settings(std::string filename="camjpeg.conf");
 
 ConfigFile cfg;
 int nocams;
+int requestLength;
+int maxConnections;
 
 };
 

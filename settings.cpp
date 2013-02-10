@@ -21,6 +21,8 @@ Settings::Settings(std::string filename) {
 	cfg.load(filename);
 	cfg.dump();
 	nocams=cfg.getvalue<int>("nocams",1);
+	requestLength=cfg.getvalue<int>("requestlength",10*1024);
+	maxConnections=cfg.getvalue<int>("maxvonnections",20);
 }
 Settings::~Settings() {
 

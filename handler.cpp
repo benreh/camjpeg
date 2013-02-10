@@ -137,10 +137,11 @@ bool Handler::read_in(string& str) {
 	char buffer[BUFFER_LENGTH];
 	memset (buffer,'\0',BUFFER_LENGTH);
 	int nBytes = read (sock, buffer,BUFFER_LENGTH-1);
-	if (nBytes < 0)
-		return false;
-	str=str+string(buffer);
-	return true;
+	if (nBytes > 0) {
+		str=str+string(buffer);
+		return true;
+	}
+	return false;
 }
 
 
@@ -149,6 +150,10 @@ bool Handler::get_request(string& request) {
 	while (request=="") {
 		if (read_in(inbuffer)) {
 			int l = inbuffer.size();
+			if (l> shm->settings->requestLength) {
+				cout << "Request header is too big, someone is messing around?" << endl;
+				return false;
+			}
 			if (inbuffer.find("\r\n\r\n")!=std::string::npos) {
 				cout << "request finished" << endl;
 				unsigned int getstart=inbuffer.find("GET");
@@ -173,11 +178,16 @@ void Handler::run(int sock, Shm* shm) {
 	this->shm=shm;
 	cout << "Handling" << endl;
 	string request("");
-	if (!get_request(request))
+	if (!get_request(request)) {
+		cout << "Error in request" << endl;
+		close(sock);
 		return;
+	}
 	cout << "request is '" << request << "'" << endl;
-	if (!answer(request))
+	if (!answer(request)) {
+		close(sock);
 		return;
+	}
 	cout << "finished answering" << endl;
 	close(sock);
 }

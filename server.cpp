@@ -111,12 +111,15 @@ bool Server::run() {
 	while(!global_quit) {
 		bool ret=select_call(sock,100000);
 		if (ret) {
-			cout << "CONNETION" << endl;
-			int sock_new = accept_call(sock);
-			Handler* h=new Handler();
-			handler.push_back(h);
-			boost::thread* thr = new boost::thread ( boost::bind( &Handler::run, h,sock_new,shm ) );
-			threads.push_back(thr);
+			if (threads.size() < shm->settings->maxConnections) {
+				int sock_new = accept_call(sock);
+				Handler* h=new Handler();
+				handler.push_back(h);
+				boost::thread* thr = new boost::thread ( boost::bind( &Handler::run, h,sock_new,shm ) );
+				threads.push_back(thr);
+			} else {
+				cout << "Too may connections" << endl;
+			}
 		}
 		//cleanup
 		for (vector<boost::thread*>::iterator th=threads.begin();th!=threads.end(); ) {
