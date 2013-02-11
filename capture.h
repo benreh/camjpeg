@@ -46,6 +46,7 @@ private:
 	int captureNumber;
 	bool gui;
 	bool timestamp;
+	bool flip;
 	CvCapture *capture;
 	IplImage  *frame ;
 	CvPoint timestampPos;

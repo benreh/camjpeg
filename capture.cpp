@@ -47,6 +47,7 @@ void Capture::getSettings(Settings &settings) {
 	h=settings.cfg.getvalueidx<int>("height",captureNumber,240);
 	BGR2RGB=settings.cfg.getvalueidx<bool>("bgr2rgb",captureNumber,true);
 	timestamp=settings.cfg.getvalueidx<bool>("timestamp",captureNumber,true);
+	flip=settings.cfg.getvalueidx<bool>("flip",captureNumber,false);
 	timestampPos=cvPoint(settings.cfg.getvalueidx<int>("timestampposx",captureNumber,1),
 		settings.cfg.getvalueidx<int>("timestampposy",captureNumber,20));
 	//in BGR
@@ -123,6 +124,10 @@ bool Capture::convert() {
 
 	
 	if (notIdle) {
+		if (flip) {
+			//~ cvConvertImage(frame,frame,CV_CVTIMG_FLIP);
+			cvFlip(frame, frame, -1);
+		}
 		IFNF(annotate());
 	}
 
