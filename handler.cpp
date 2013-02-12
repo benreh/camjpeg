@@ -148,6 +148,8 @@ int Handler::extractNr(string str){
 		return -1;
 	}
 	start+=3;
+	if (str.length()<start)
+		return -1;
 	unsigned int end=str.find(".",start);
 	if (end==std::string::npos) {
 		return -1;
