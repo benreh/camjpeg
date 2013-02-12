@@ -84,13 +84,13 @@ bool Handler::answer(string request) {
 	int nr=extractNr(request);
 	if (!(nr < shm->settings->nocams))
 		nr=-1;
-	if (request.find(".jpg")!=std::string::npos &&  nr >-1){
+	if ((request.find(".jpg")!=std::string::npos || request.find(".jpeg")!=std::string::npos) &&  nr >-1){
 		cout << "requested jpg from " << nr << endl;
 		out  ="HTTP/1.1 200 OK\r\n";
 		out +="Content-Type: image/jpeg\r\n\r\n";
 		send_str(out);
 		sendjpg(nr);
-	} else if (request.find(".mjpg")!=std::string::npos &&  nr >-1){
+	} else if ((request.find(".mjpg")!=std::string::npos || request.find(".mjpeg")!=std::string::npos) &&  nr >-1){
 		cout << "requested mjpg from " << nr << endl;
 		out  ="HTTP/1.1 200 OK\r\n";
 		out +="Cache-Control: no-cache\r\n";
