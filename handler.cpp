@@ -195,6 +195,8 @@ bool Handler::get_request(string& request) {
 				request=inbuffer.substr(getstart,getend-getstart);
 			}
 		} else {
+			cout << "error while reading:" << endl;
+			cout << inbuffer << endl;
 			return false;
 		}
 
