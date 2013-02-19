@@ -167,7 +167,10 @@ void Capture::run(Shm* shm) {
 	cout << "Capture thread started #" << captureNumber << endl;
 	this->shm=shm;
 	getSettings(*(shm->settings));
-	open();
+	while(!open()&& ! global_quit) {
+		cout << "could not open capture device #" << captureNumber << endl;
+		sleep(2);
+	};
 	while(loop() && !global_quit) {};
 
 
