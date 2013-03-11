@@ -125,9 +125,22 @@ bool Capture::convert() {
 	
 	if (notIdle) {
 		if (flip) {
+			int flipMode=-1;
+			if (flip==1)
+				flipMode=-1;
+			else if (flip==2)
+				flipMode=0;
+			else if (flip==3)
+				flipMode=1;
 			//~ cvConvertImage(frame,frame,CV_CVTIMG_FLIP);
-			cvFlip(frame, frame, -1);
+			cvFlip(frame, frame, flipMode);
 		}
+		IplImage *rotated;
+		rotated = cvCreateImage(cvSize(frame->height, frame->width), frame->depth, frame->nChannels);
+		cvTranspose(frame, rotated);
+		cvReleaseImage(&frame);
+		frame=rotated;
+		
 		IFNF(annotate());
 	}
 
