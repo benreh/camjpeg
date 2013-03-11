@@ -47,7 +47,7 @@ void Capture::getSettings(Settings &settings) {
 	h=settings.cfg.getvalueidx<int>("height",captureNumber,240);
 	BGR2RGB=settings.cfg.getvalueidx<bool>("bgr2rgb",captureNumber,true);
 	timestamp=settings.cfg.getvalueidx<bool>("timestamp",captureNumber,true);
-	flip=settings.cfg.getvalueidx<bool>("flip",captureNumber,false);
+	flip=settings.cfg.getvalueidx<int>("flip",captureNumber,false);
 	timestampPos=cvPoint(settings.cfg.getvalueidx<int>("timestampposx",captureNumber,1),
 		settings.cfg.getvalueidx<int>("timestampposy",captureNumber,20));
 	//in BGR
@@ -72,7 +72,9 @@ bool Capture::open() {
 	return true;
 }
 bool Capture::query() {
-	frame = cvQueryFrame( capture );
+	captureframe = cvQueryFrame( capture );
+	frame=captureframe;
+	
 	if (!frame)
 		return false;
 	//~ cout << ".";
@@ -124,28 +126,27 @@ bool Capture::convert() {
 
 	
 	if (notIdle) {
-		if (flip) {
-			int flipMode=-1;
-			if (flip==1)
-				flipMode=-1;
-			else if (flip==2)
-				flipMode=0;
-			else if (flip==3)
-				flipMode=1;
-			//~ cvConvertImage(frame,frame,CV_CVTIMG_FLIP);
-			cvFlip(frame, frame, flipMode);
+		if (flip==2) {
+			cvFlip(frame, frame, -1);
+		} else if (flip==1) {
+			IplImage *rotated;
+			rotated = cvCreateImage(cvSize(frame->height, frame->width), frame->depth, frame->nChannels);
+			cvTranspose(frame, rotated);
+			frame=rotated;
+			cvFlip(frame, frame, 1);
+		} else if (flip==3) {
+			cvFlip(frame, frame, 1);
+			IplImage *rotated;
+			rotated = cvCreateImage(cvSize(frame->height, frame->width), frame->depth, frame->nChannels);
+			cvTranspose(frame, rotated);
+			frame=rotated;
+			
 		}
-		IplImage *rotated;
-		rotated = cvCreateImage(cvSize(frame->height, frame->width), frame->depth, frame->nChannels);
-		cvTranspose(frame, rotated);
-		cvReleaseImage(&frame);
-		frame=rotated;
-		
 		IFNF(annotate());
 	}
-
-	IFNF(show());
-
+	if (notIdle) {
+		IFNF(show());
+	}
 	if (notIdle) {
 		if (BGR2RGB)
 			cvCvtColor ( frame, frame, CV_BGR2RGB );
@@ -160,7 +161,9 @@ bool Capture::convert() {
 		cd.idleCounter++;
 		cd.mutex.unlock();
 	}	
-
+	if (captureframe!=frame) {
+		cvReleaseImage(&frame);
+	}
 	//~ save("test.jpg",outbuffer,outlen);
 
 	

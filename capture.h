@@ -46,9 +46,10 @@ private:
 	int captureNumber;
 	bool gui;
 	bool timestamp;
-	bool flip;
+	int flip;
 	CvCapture *capture;
 	IplImage  *frame ;
+	IplImage  *captureframe ;
 	CvPoint timestampPos;
 	CvScalar fontcolor;
 	std::string windowname;
